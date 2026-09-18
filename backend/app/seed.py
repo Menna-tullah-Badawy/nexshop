@@ -95,6 +95,7 @@ def seed_all(db: Session) -> None:
                     {"code": "AED", "rate": 0.073, "enabled": True},
                 ],
                 delivery_enabled=True,
+                free_delivery_above=1000,
                 cod_enabled=True,
                 stripe_enabled=False,
                 demo_payments=True,

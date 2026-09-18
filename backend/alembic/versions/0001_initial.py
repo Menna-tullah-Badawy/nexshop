@@ -162,6 +162,7 @@ def upgrade() -> None:
         sa.Column("base_currency", sa.String(16), nullable=False, server_default="EGP"),
         sa.Column("currencies", sa.JSON(), nullable=False),
         sa.Column("delivery_enabled", sa.Boolean(), nullable=False, server_default=sa.text("true")),
+        sa.Column("free_delivery_above", sa.Numeric(12, 2), nullable=False, server_default="0"),
         sa.Column("cod_enabled", sa.Boolean(), nullable=False, server_default=sa.text("true")),
         sa.Column("stripe_enabled", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("stripe_secret_key", sa.String(512)),

@@ -98,7 +98,7 @@ export interface Brand {
   announcement: { ar: string; en: string }
   base_currency: string
   currencies: Currency[]
-  delivery: { enabled: boolean; zones: Zone[] }
+  delivery: { enabled: boolean; free_delivery_above: number; zones: Zone[] }
   payments: { cod: boolean; stripe: boolean; demo: boolean }
   contact: { phone: string | null; email: string | null; address: string | null }
   social: Record<string, string>

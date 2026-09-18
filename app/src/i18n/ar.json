@@ -171,6 +171,8 @@
     "saveSettings": "حفظ الإعدادات",
     "saved": "تم الحفظ ✓",
     "deliveryEnabled": "تفعيل التوصيل",
+    "freeDelivery": "توصيل مجاني للطلبات فوق",
+    "freeDeliveryHint": "اترك 0 لتعطيل التوصيل المجاني. الحد بالعملة الأساسية",
     "noAccess": "دي صفحة للأدمن بس",
     "back": "رجوع",
     "confirmDelete": "متأكد؟",

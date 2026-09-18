@@ -24,11 +24,11 @@ def test_cod_order_totals(client):
     tok = register(client, "shopper1@test.com")["access_token"]
     res = _checkout(client, tok, payment="cod")
     o = res["order"]
-    # 1 x 1850 + 25 delivery (Cairo)
+    # 1 x 1850 — free delivery (1850 >= 1000 threshold)
     assert o["base_subtotal"] == 1850
-    assert o["base_delivery"] == 25
-    assert o["base_total"] == 1875
-    assert o["total"] == 1875
+    assert o["base_delivery"] == 0
+    assert o["base_total"] == 1850
+    assert o["total"] == 1850
     assert o["currency"] == "EGP"
     assert o["status"] == "pending"
     assert o["payment_status"] == "pending"
@@ -39,16 +39,34 @@ def test_cod_order_totals(client):
     assert r.json()["stock"] == 41
 
 
+def test_delivery_fee_below_threshold(client):
+    tok = register(client, "shopper1b@test.com")["access_token"]
+    h = {"Authorization": f"Bearer {tok}"}
+    # power bank 650 < 1000 -> Cairo fee 25 applies
+    r = client.post("/api/orders", json={
+        "items": [{"product_id": 4, "qty": 1}],
+        "address": {"full_name": "عميل", "phone": "+201011122233"},
+        "governorate_id": 1, "payment_method": "cod",
+    }, headers=h)
+    assert r.status_code == 201, r.text
+    o = r.json()["order"]
+    assert o["base_subtotal"] == 650
+    assert o["base_delivery"] == 25
+    assert o["base_total"] == 675
+
+
 def test_promo_percent_and_fixed(client):
     tok = register(client, "shopper2@test.com")["access_token"]
     res = _checkout(client, tok, promo="WELCOME10")
     o = res["order"]
     assert o["base_discount"] == 185.0
-    assert o["base_total"] == 1850 - 185 + 25
+    assert o["base_delivery"] == 0  # 1850 >= 1000
+    assert o["base_total"] == 1850 - 185
 
     tok2 = register(client, "shopper3@test.com")["access_token"]
     res2 = _checkout(client, tok2, promo="SAVE50")
     assert res2["order"]["base_discount"] == 50.0
+    assert res2["order"]["base_total"] == 1800
 
 
 def test_invalid_promo(client):
@@ -79,7 +97,7 @@ def test_usd_currency_conversion(client):
     o = res["order"]
     assert o["currency"] == "USD"
     assert o["rate"] > 0
-    assert o["base_total"] == 1875
+    assert o["base_total"] == 1850  # free delivery over 1000
     # display total must be base_total converted at the stored rate
     assert abs(o["total"] - round(o["base_total"] * o["rate"], 2)) < 0.02
 

@@ -55,6 +55,8 @@ class SiteSettings(Base):
 
     # Logistics
     delivery_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    # Base-currency threshold above which delivery is free (0 = disabled)
+    free_delivery_above: Mapped[float] = mapped_column(Numeric(12, 2), default=0)
 
     # Payments
     cod_enabled: Mapped[bool] = mapped_column(Boolean, default=True)

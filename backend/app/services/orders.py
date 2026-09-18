@@ -108,7 +108,12 @@ def compute_lines(db: Session, body: CheckoutIn, settings: SiteSettings):
         subtotal += q2(p.price) * line.qty
 
     gov = resolve_governorate(db, body.governorate_id)
-    delivery = q2(gov.fee) if (gov and settings.delivery_enabled) else q2(0)
+    threshold = float(settings.free_delivery_above or 0)
+    if gov and settings.delivery_enabled:
+        # free delivery above the threshold (base currency)
+        delivery = q2(0) if subtotal >= q2(threshold) and threshold > 0 else q2(gov.fee)
+    else:
+        delivery = q2(0)
 
     promo = apply_promo(db, body.promo_code, subtotal)
     discount = q2(0)

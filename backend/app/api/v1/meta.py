@@ -33,6 +33,7 @@ def brand(lang: str = "en", db: Session = Depends(get_db)):
         "currencies": currency_list(s),
         "delivery": {
             "enabled": s.delivery_enabled,
+            "free_delivery_above": float(s.free_delivery_above or 0),
             "zones": [
                 {"id": z.id, "name_ar": z.name_ar, "name_en": z.name_en, "fee": float(z.fee)}
                 for z in zones

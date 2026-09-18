@@ -88,6 +88,7 @@ def settings_dict(s) -> dict:
         "base_currency": s.base_currency,
         "currencies": s.currencies or [],
         "delivery_enabled": s.delivery_enabled,
+        "free_delivery_above": float(s.free_delivery_above or 0),
         "cod_enabled": s.cod_enabled,
         "stripe_enabled": s.stripe_enabled,
         "stripe_secret_key": s.stripe_secret_key,

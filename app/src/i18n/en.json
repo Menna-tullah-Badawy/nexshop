@@ -171,6 +171,8 @@
     "saveSettings": "Save settings",
     "saved": "Saved ✓",
     "deliveryEnabled": "Delivery enabled",
+    "freeDelivery": "Free delivery on orders above",
+    "freeDeliveryHint": "Set 0 to disable free delivery. Threshold in base currency",
     "noAccess": "Admins only",
     "back": "Back",
     "confirmDelete": "Are you sure?",

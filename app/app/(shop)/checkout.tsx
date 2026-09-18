@@ -33,10 +33,13 @@ export default function Checkout() {
   const [busy, setBusy] = useState(false)
 
   const subtotal = cartSubtotal(useCartStore.getState())
+  const freeAbove = brand?.delivery?.free_delivery_above ?? 0
+  const isFreeDelivery = freeAbove > 0 && subtotal >= freeAbove
   const govFee = useMemo(() => {
+    if (isFreeDelivery) return 0
     const z = zones.find((z) => String(z.id) === governorateId)
     return z ? z.fee : 0
-  }, [governorateId, zones])
+  }, [governorateId, zones, isFreeDelivery])
 
   if (lines.length === 0) {
     return (
@@ -184,7 +187,11 @@ export default function Checkout() {
           </View>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
             <Text style={{ color: colors.textMuted, fontSize: 13 }}>{t('app.delivery')}</Text>
-            <Price amount={govFee} size={14} color={colors.text} />
+            {isFreeDelivery ? (
+              <Text style={{ color: colors.success, fontSize: 13, fontWeight: '800' }}>FREE 🎉</Text>
+            ) : (
+              <Price amount={govFee} size={14} color={colors.text} />
+            )}
           </View>
           {promoCode ? (
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>

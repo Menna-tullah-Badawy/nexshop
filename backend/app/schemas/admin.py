@@ -77,6 +77,7 @@ class SettingsUpdate(BaseModel):
     currencies: list[RateIn] | None = None
     # Logistics / payments
     delivery_enabled: bool | None = None
+    free_delivery_above: float | None = Field(default=None, ge=0)
     cod_enabled: bool | None = None
     stripe_enabled: bool | None = None
     stripe_secret_key: str | None = None

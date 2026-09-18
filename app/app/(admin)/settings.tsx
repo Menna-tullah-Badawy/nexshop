@@ -43,6 +43,7 @@ interface Settings {
   base_currency: string
   currencies: { code: string; rate: number; enabled: boolean }[]
   delivery_enabled: boolean
+  free_delivery_above: number
   cod_enabled: boolean
   stripe_enabled: boolean
   stripe_secret_key: string | null
@@ -113,6 +114,7 @@ export default function AdminSettings() {
         base_currency: s.base_currency,
         currencies: rates.filter((r) => Number(r.rate) > 0).map((r) => ({ code: r.code, rate: Number(r.rate), enabled: r.enabled })),
         delivery_enabled: s.delivery_enabled,
+        free_delivery_above: Number(s.free_delivery_above) || 0,
         cod_enabled: s.cod_enabled,
         stripe_enabled: s.stripe_enabled,
         demo_payments: s.demo_payments,
@@ -240,11 +242,18 @@ export default function AdminSettings() {
         </View>
 
         <Title>{t('app.deliveryTitle')}</Title>
-        <View style={{ backgroundColor: colors.surface, borderRadius: radius, borderWidth: 1, borderColor: colors.border, padding: 14 }}>
+        <View style={{ backgroundColor: colors.surface, borderRadius: radius, borderWidth: 1, borderColor: colors.border, padding: 14, gap: 6 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <Text style={{ color: colors.text, fontSize: 13, fontWeight: '600' }}>{t('app.deliveryEnabled')}</Text>
             <Switch value={s.delivery_enabled} onValueChange={(v) => set({ delivery_enabled: v })} trackColor={{ true: colors.primary, false: colors.border }} thumbColor="#fff" />
           </View>
+          <Input
+            label={`${t('app.freeDelivery')} (${t('app.baseCurrency')})`}
+            value={String(s.free_delivery_above ?? 0)}
+            onChangeText={(v) => set({ free_delivery_above: Number(v) || 0 })}
+            keyboardType="decimal-pad"
+          />
+          <Text style={{ color: colors.textMuted, fontSize: 11 }}>{t('app.freeDeliveryHint')}</Text>
         </View>
 
         <Title>{t('app.contact')}</Title>

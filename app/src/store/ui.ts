@@ -85,7 +85,7 @@ function envBrand(): Brand {
     },
     base_currency: cur,
     currencies: [{ code: cur, rate: 1, name_ar: cur, name_en: cur, symbol: cur }],
-    delivery: { enabled: true, zones: [] },
+    delivery: { enabled: true, free_delivery_above: 0, zones: [] },
     payments: { cod: true, stripe: true, demo: true },
     contact: { phone: null, email: null, address: null },
     social: {},
