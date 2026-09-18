@@ -1,0 +1,23 @@
+{
+  "$comment": "White-label build-time defaults. Run `npm run brand` (in /app) to inject these into app/.env as EXPO_PUBLIC_* vars. Runtime branding (editable live from Admin → Settings) always overrides these.",
+  "storeName": "NexShop",
+  "storeNameAr": "نيكس شوب",
+  "taglineEn": "Everything you need, delivered.",
+  "taglineAr": "كل اللي محتاجه، يوصلك.",
+  "primaryColor": "#6C4DF6",
+  "themePreset": "aurora",
+  "logoUrl": "",
+  "announcementEn": "Free delivery on orders over 1000 EGP 🚚",
+  "announcementAr": "توصيل مجاني للطلبات فوق 1000 جنيه 🚚",
+  "baseCurrency": "EGP",
+  "currencies": [
+    { "code": "USD", "rate": 0.02 },
+    { "code": "SAR", "rate": 0.075 },
+    { "code": "AED", "rate": 0.073 }
+  ],
+  "contact": {
+    "phone": "+20 100 000 0000",
+    "email": "support@nexshop.com",
+    "address": "Cairo, Egypt"
+  }
+}

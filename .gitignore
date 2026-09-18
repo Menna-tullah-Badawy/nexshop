@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+test.db
+*.sqlite3
+
+# Node / Expo
+node_modules/
+dist/
+.expo/
+.expo-shared/
+web-build/
+*.tsbuildinfo
+app/.env
+app/.env.local
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.log
+
+# Misc
+coverage/
+build/
+.pgdata/
+
+# Tool caches (workspace-level)
+.npm/
+.cache/
+.local/
+
+# Local databases
+backend/dev.db
+backend/test.db

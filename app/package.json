@@ -1,0 +1,41 @@
+{
+  "name": "nexshop-app",
+  "version": "1.0.0",
+  "main": "expo-router/entry",
+  "private": true,
+  "scripts": {
+    "start": "expo start",
+    "web": "expo start --web",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "build:web": "expo export --platform web",
+    "brand": "node ../scripts/inject-brand.mjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "3.1.1",
+    "expo": "57.0.11",
+    "expo-image": "57.0.5",
+    "expo-secure-store": "57.0.4",
+    "expo-splash-screen": "57.0.9",
+    "expo-status-bar": "57.0.1",
+    "expo-web-browser": "57.0.3",
+    "expo-router": "57.0.22",
+    "i18next": "26.4.2",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-i18next": "17.0.14",
+    "react-native": "0.86.0",
+    "react-native-gesture-handler": "3.3.0",
+    "react-native-i18n": "2.0.15",
+    "react-native-reanimated": "4.6.0",
+    "react-native-web": "0.21.2",
+    "zustand": "5.0.15"
+  },
+  "devDependencies": {
+    "@babel/core": "^8.0.5",
+    "@types/react": "^19.1.1",
+    "typescript": "^5.9.2"
+  }
+}

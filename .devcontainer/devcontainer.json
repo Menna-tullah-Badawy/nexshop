@@ -1,0 +1,22 @@
+{
+  "name": "NexShop Dev (FastAPI + Expo)",
+  "image": "mcr.microsoft.com/devcontainers/python:3.13",
+  "features": {
+    "ghcr.io/devcontainers/features/node:20": {}
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "forwardPorts": [8000, 8081],
+  "portsAttributes": {
+    "8000": { "label": "API (FastAPI + Swagger)", "onAutoForward": "notify" },
+    "8081": { "label": "NexShop (Expo Web)" }
+  },
+  "containerEnv": {
+    "DATABASE_URL": "sqlite:///./backend/dev.db",
+    "JWT_SECRET": "devcontainer-secret-change-me-0123456789",
+    "FRONTEND_URL": "http://localhost:8081",
+    "CORS_ORIGINS": "*",
+    "ENV": "development",
+    "AUTO_SEED": "true",
+    "AUTO_CREATE_TABLES": "true"
+  }
+}
