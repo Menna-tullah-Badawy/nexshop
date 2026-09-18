@@ -14,6 +14,7 @@ import { useTheme } from '../../src/theme/ThemeContext'
 import { useUiStore } from '../../src/store/ui'
 import { api } from '../../src/lib/api'
 import { fmtDate } from '../../src/lib/format'
+import { openInvoice, openShippingLabel, whatsappOrderLink } from '../../src/lib/print'
 import type { Order } from '../../src/lib/types'
 import { t } from '../../src/i18n'
 
@@ -29,6 +30,7 @@ export default function AdminOrderDetail() {
   const router = useRouter()
   const { colors, radius } = useTheme()
   const lang = useUiStore((s) => s.lang)
+  const brand = useUiStore((s) => s.brand)
   const [o, setO] = useState<Order | null>(null)
   const [busy, setBusy] = useState(false)
   const [courier, setCourier] = useState({ name: '', phone: '', notes: '' })
@@ -99,6 +101,22 @@ export default function AdminOrderDetail() {
               }}
             />
           ) : null}
+          <Button
+            small
+            variant="outline"
+            label={`🟢 ${t('app.sendWhatsapp')}`}
+            onPress={() => {
+              const url = whatsappOrderLink(o, t(`app.st_${o.status}`), brand?.store_name ?? 'Store')
+              if (typeof window !== 'undefined') window.open(url, '_blank')
+            }}
+          />
+          <Button small variant="outline" label={`🖨 ${t('app.printLabel')}`} onPress={() => openShippingLabel(o, brand?.store_name ?? 'Store')} />
+          <Button
+            small
+            variant="outline"
+            label={`🧾 ${t('app.printInvoice')}`}
+            onPress={() => openInvoice(o, brand?.store_name ?? 'Store', { phone: brand?.contact?.phone, email: brand?.contact?.email })}
+          />
           {o.status !== 'cancelled' && o.status !== 'delivered' ? (
             <Button
               small

@@ -1,17 +1,22 @@
+import secrets
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from ...core.config import get_settings as get_cfg
 from ...core.deps import get_current_user, get_db
 from ...models import Order, OrderItem, Product, User
 from ...schemas import CheckoutIn, Msg
 from ...services import (
+    WALLET_METHODS,
     PaymentsService,
     compute_lines,
     convert,
+    effective_price,
     get_settings_row,
+    mailer,
     new_order_no,
     q2,
     rates_map,
@@ -36,11 +41,16 @@ def _get_order(db: Session, key: str) -> Order:
 @router.post("", status_code=201, response_model=dict)
 def create_order(body: CheckoutIn, user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     settings = get_settings_row(db)
+    demo_ok = settings.demo_payments and not get_cfg().is_production
 
     if body.payment_method == "cod" and not settings.cod_enabled:
         raise HTTPException(status_code=400, detail="Cash on delivery is not enabled")
-    if body.payment_method == "stripe" and not (settings.stripe_enabled or settings.demo_payments):
+    if body.payment_method == "stripe" and not (settings.stripe_enabled or demo_ok):
         raise HTTPException(status_code=400, detail="Card payment is not enabled")
+    if body.payment_method in ("vodafone_cash", "instapay") and not settings.wallet_enabled:
+        raise HTTPException(status_code=400, detail="Wallet payment is not enabled")
+    if body.payment_method == "fawry" and not (settings.fawry_enabled and settings.wallet_enabled):
+        raise HTTPException(status_code=400, detail="Fawry payment is not enabled")
 
     lines, base_subtotal, base_delivery, base_discount, promo = compute_lines(db, body, settings)
     snapshot = resolve_address(db, user, body)
@@ -92,16 +102,24 @@ def create_order(body: CheckoutIn, user: User = Depends(get_current_user), db: S
                 name_en=p.name_en,
                 image=(p.images or [None])[0],
                 variant=line.variant,
-                price=float(p.price),
+                price=float(effective_price(p)),
                 qty=line.qty,
-                line_total=float(q2(p.price) * line.qty),
+                line_total=float(effective_price(p) * line.qty),
             )
         )
         p.stock -= line.qty
 
+    if body.payment_method in WALLET_METHODS:
+        order.payment_reference = f"{order.order_no[-6:]}-{secrets.token_hex(2).upper()}"
+
     result = PaymentsService(settings).start_payment(order)
     db.commit()
     db.refresh(order)
+
+    # Notifications (no-op console log when SMTP is not configured)
+    mailer.send_order_confirmation(order, settings)
+    mailer.send_merchant_order_notice(order, settings)
+
     return {
         "order": order_dict(order),
         "payment": {

@@ -28,7 +28,9 @@ export default function Checkout() {
   const [savedId, setSavedId] = useState<string | null>(user?.addresses?.find((a) => a.is_default)?.id != null ? String(user.addresses.find((a) => a.is_default)!.id) : user?.addresses?.[0] ? String(user.addresses[0].id) : 'new')
   const [addr, setAddr] = useState({ full_name: user?.full_name ?? '', phone: user?.phone ?? '', city: '', street: '', notes: '' })
   const [governorateId, setGovernorateId] = useState<string | null>(null)
-  const [method, setMethod] = useState<'cod' | 'stripe'>(brand?.payments?.cod ? 'cod' : 'stripe')
+  const [method, setMethod] = useState<'cod' | 'stripe' | 'vodafone_cash' | 'instapay' | 'fawry'>(
+    brand?.payments?.cod ? 'cod' : 'stripe',
+  )
   const [notes, setNotes] = useState('')
   const [busy, setBusy] = useState(false)
 
@@ -50,10 +52,17 @@ export default function Checkout() {
     )
   }
 
-  const payMethods: { id: 'cod' | 'stripe'; label: string }[] = []
+  const payMethods: { id: 'cod' | 'stripe' | 'vodafone_cash' | 'instapay' | 'fawry'; label: string; hint?: string }[] = []
   if (brand?.payments?.cod) payMethods.push({ id: 'cod', label: t('app.cod') })
   if (brand?.payments?.stripe)
     payMethods.push({ id: 'stripe', label: brand.payments.demo ? `${t('app.stripe')} (Demo)` : t('app.stripe') })
+  if (brand?.payments?.wallet) {
+    if (brand.payments.wallet_phone)
+      payMethods.push({ id: 'vodafone_cash', label: t('app.vodafoneCash'), hint: brand.payments.wallet_phone })
+    if (brand.payments.instapay_address)
+      payMethods.push({ id: 'instapay', label: t('app.instapay'), hint: brand.payments.instapay_address })
+  }
+  if (brand?.payments?.fawry) payMethods.push({ id: 'fawry', label: t('app.fawry') })
 
   const submit = async () => {
     if (!user) return
@@ -174,8 +183,12 @@ export default function Checkout() {
                 {method === m.id ? <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.onPrimary }} /> : null}
               </View>
               <Text style={{ color: colors.text, fontSize: 14, fontWeight: '600', flex: 1 }}>{m.label}</Text>
+              {m.hint ? <Text style={{ color: colors.textMuted, fontSize: 12 }}>{m.hint}</Text> : null}
             </View>
           ))}
+          {method === 'vodafone_cash' || method === 'instapay' || method === 'fawry' ? (
+            <Text style={{ color: colors.textMuted, fontSize: 12, lineHeight: 18 }}>{t('app.walletHint')}</Text>
+          ) : null}
         </View>
 
         <Input label={t('app.notes')} value={notes} onChangeText={setNotes} placeholder={t('app.notesPlaceholder')} multiline />

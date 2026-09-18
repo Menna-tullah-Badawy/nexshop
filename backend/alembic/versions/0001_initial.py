@@ -68,6 +68,9 @@ def upgrade() -> None:
         sa.Column("brand", sa.String(128)),
         sa.Column("price", sa.Numeric(12, 2), nullable=False),
         sa.Column("cost", sa.Numeric(12, 2), nullable=False, server_default="0"),
+        sa.Column("sale_price", sa.Numeric(12, 2)),
+        sa.Column("sale_starts_at", sa.DateTime(timezone=True)),
+        sa.Column("sale_ends_at", sa.DateTime(timezone=True)),
         sa.Column("stock", sa.Integer(), nullable=False, server_default="0"),
         sa.Column("images", sa.JSON(), nullable=False),
         sa.Column("variants", sa.JSON()),
@@ -90,8 +93,9 @@ def upgrade() -> None:
         sa.Column("order_no", sa.String(32), nullable=False, unique=True, index=True),
         sa.Column("user_id", sa.Integer(), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True),
         sa.Column("status", sa.String(24), nullable=False, server_default="pending", index=True),
-        sa.Column("payment_method", sa.String(16), nullable=False, server_default="cod"),
+        sa.Column("payment_method", sa.String(24), nullable=False, server_default="cod"),
         sa.Column("payment_status", sa.String(16), nullable=False, server_default="pending"),
+        sa.Column("payment_reference", sa.String(64)),
         sa.Column("currency", sa.String(16), nullable=False, server_default="EGP"),
         sa.Column("rate", sa.Numeric(12, 6), nullable=False, server_default="1"),
         sa.Column("subtotal", sa.Numeric(12, 2), nullable=False, server_default="0"),
@@ -167,17 +171,32 @@ def upgrade() -> None:
         sa.Column("stripe_enabled", sa.Boolean(), nullable=False, server_default=sa.text("false")),
         sa.Column("stripe_secret_key", sa.String(512)),
         sa.Column("demo_payments", sa.Boolean(), nullable=False, server_default=sa.text("true")),
+        sa.Column("wallet_enabled", sa.Boolean(), nullable=False, server_default=sa.text("true")),
+        sa.Column("wallet_phone", sa.String(32)),
+        sa.Column("instapay_address", sa.String(128)),
+        sa.Column("fawry_enabled", sa.Boolean(), nullable=False, server_default=sa.text("false")),
+        sa.Column("whatsapp_number", sa.String(32)),
+        sa.Column("low_stock_threshold", sa.Integer(), nullable=False, server_default="5"),
         sa.Column("contact_phone", sa.String(32)),
         sa.Column("contact_email", sa.String(255)),
         sa.Column("contact_address", sa.String(512)),
         sa.Column("social", sa.JSON(), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
     )
+    op.create_table(
+        "password_reset_tokens",
+        sa.Column("id", sa.Integer(), primary_key=True),
+        sa.Column("user_id", sa.Integer(), sa.ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True),
+        sa.Column("token", sa.String(64), nullable=False, unique=True, index=True),
+        sa.Column("expires_at", sa.DateTime(timezone=True), nullable=False),
+        sa.Column("used", sa.Boolean(), nullable=False, server_default=sa.text("false")),
+        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+    )
 
 
 def downgrade() -> None:
     for table in (
-        "site_settings", "reviews", "promos", "order_items", "orders",
-        "governorates", "products", "categories", "addresses", "users",
+        "password_reset_tokens", "site_settings", "reviews", "promos", "order_items",
+        "orders", "governorates", "products", "categories", "addresses", "users",
     ):
         op.drop_table(table)

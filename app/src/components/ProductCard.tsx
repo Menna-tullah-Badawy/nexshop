@@ -39,6 +39,23 @@ export function ProductCard({ p, compact = false }: { p: Product; compact?: bool
       <Pressable onPress={() => router.push(`/product/${p.slug}`)} style={{ padding: 8, paddingBottom: 0 }}>
         <View style={{ position: 'relative' }}>
           <ImgX uri={p.images?.[0]} style={{ width: '100%', aspectRatio: 1, borderRadius: radius - 6 }} />
+          {p.sale_price != null ? (
+            <View
+              style={{
+                position: 'absolute',
+                top: 8,
+                left: 8,
+                backgroundColor: colors.danger,
+                borderRadius: 999,
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+              }}
+            >
+              <Text style={{ color: '#fff', fontSize: 10, fontWeight: '800' }}>
+                ⚡ {t('app.sale')} -{Math.round((1 - p.sale_price / p.price) * 100)}%
+              </Text>
+            </View>
+          ) : null}
           {p.is_featured ? (
             <View
               style={{
@@ -74,7 +91,10 @@ export function ProductCard({ p, compact = false }: { p: Product; compact?: bool
           {name}
         </Text>
         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: 4 }}>
-          <Price amount={p.price} size={compact ? 14 : 16} />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Price amount={p.sale_price ?? p.price} size={compact ? 14 : 16} />
+            {p.sale_price != null ? <Price amount={p.price} size={11} muted strike /> : null}
+          </View>
           <Pressable
             onPress={doAdd}
             disabled={p.stock <= 0}

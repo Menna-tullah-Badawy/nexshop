@@ -17,6 +17,7 @@ export default function OrderSuccess() {
   const { order, cancelled } = useLocalSearchParams<{ order: string; cancelled?: string }>()
   const { colors, radius } = useTheme()
   const lang = useUiStore((s) => s.lang)
+  const brand = useUiStore((s) => s.brand)
   const [o, setO] = useState<Order | null>(null)
   const [notFound, setNotFound] = useState(false)
 
@@ -71,6 +72,25 @@ export default function OrderSuccess() {
         <Text style={{ color: colors.text, fontSize: 20, fontWeight: '800' }}>
           {isCancelled ? t('app.orderCancelledTitle') : waiting ? t('app.waitingPayment') : t('app.orderSuccess')}
         </Text>
+
+        {o && (o.payment_method === 'vodafone_cash' || o.payment_method === 'instapay' || o.payment_method === 'fawry') ? (
+          <View style={{ width: '100%', backgroundColor: colors.primarySoft, borderRadius: radius, borderWidth: 1, borderColor: colors.primary, padding: 14, gap: 6 }}>
+            <Text style={{ color: colors.text, fontWeight: '800', fontSize: 14 }}>💳 {t('app.walletPayTitle')}</Text>
+            <Text style={{ color: colors.textMuted, fontSize: 13, lineHeight: 20 }}>{t('app.walletPayBody')}</Text>
+            {brand?.payments?.wallet_phone && o.payment_method === 'vodafone_cash' ? (
+              <Text style={{ color: colors.primary, fontWeight: '800', fontSize: 15 }}>{brand.payments.wallet_phone}</Text>
+            ) : null}
+            {brand?.payments?.instapay_address && o.payment_method === 'instapay' ? (
+              <Text style={{ color: colors.primary, fontWeight: '800', fontSize: 15 }}>{brand.payments.instapay_address}</Text>
+            ) : null}
+            {o.payment_reference ? (
+              <Text style={{ color: colors.text, fontSize: 13 }}>
+                {t('app.transferRef')}: <Text style={{ fontWeight: '800' }}>{o.payment_reference}</Text>
+              </Text>
+            ) : null}
+            <Text style={{ color: colors.textMuted, fontSize: 12 }}>{t('app.walletPayConfirm')}</Text>
+          </View>
+        ) : null}
 
         {o ? (
           <View style={{ width: '100%', backgroundColor: colors.surface, borderRadius: radius, borderWidth: 1, borderColor: colors.border, padding: 16, gap: 14 }}>

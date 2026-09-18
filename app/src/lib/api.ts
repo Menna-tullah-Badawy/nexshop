@@ -40,6 +40,37 @@ interface ApiOpts {
   _retried?: boolean
 }
 
+/** Multipart upload (admin image uploads). Returns parsed JSON. */
+export async function uploadFile<T = { url: string }>(path: string, uri: string, fileName: string): Promise<T> {
+  const form = new FormData()
+  // react-native accepts {uri, name, type} objects; web accepts Blobs
+  if (Platform.OS === 'web') {
+    const res = await fetch(uri)
+    const blob = await res.blob()
+    form.append('file', blob, fileName)
+  } else {
+    form.append('file', { uri, name: fileName, type: 'image/jpeg' } as unknown as Blob)
+  }
+  const accessToken = currentToken()
+  const resp = await fetch(`${apiBase()}${path}`, {
+    method: 'POST',
+    headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    body: form,
+  })
+  const data = (await resp.json().catch(() => ({}))) as Record<string, unknown> & T
+  if (!resp.ok) {
+    throw new ApiError(resp.status, typeof data?.detail === 'string' ? data.detail : 'Upload failed')
+  }
+  return data
+}
+
+/** Resolve a possibly-relative media URL (e.g. /uploads/x.png) against the API host. */
+export function mediaUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  if (url.startsWith('http') || url.startsWith('data:')) return url
+  return `${apiBase().replace(/\/api$/, '')}${url.startsWith('/') ? url : `/${url}`}`
+}
+
 export async function api<T = unknown>(path: string, opts: ApiOpts = {}): Promise<T> {
   const accessToken = opts.auth === false ? null : currentToken()
   const res = await fetch(`${apiBase()}${path}`, {

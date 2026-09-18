@@ -1,4 +1,4 @@
-.PHONY: setup seed test run-api run-web docker-up docker-down typecheck
+.PHONY: setup seed test run-api run-web docker-up docker-down typecheck backup new-customer
 
 PY ?= python3
 
@@ -27,3 +27,10 @@ docker-up: ## Full stack with Docker
 
 docker-down:
 	docker compose down
+
+backup: ## Manual database backup -> backups/nexshop-<date>.sql.gz
+	mkdir -p backups
+	docker compose exec -T db pg_dump -U $(or $(POSTGRES_USER),shop) $(or $(POSTGRES_DB),nexshop) | gzip > backups/nexshop-$$(date +%F_%H%M).sql.gz
+
+new-customer: ## Scaffold a white-label customer: make new-customer name="My Store"
+	node scripts/new-customer.mjs "$(name)"

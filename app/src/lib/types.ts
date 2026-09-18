@@ -54,6 +54,8 @@ export interface Product {
   desc_en: string | null
   brand: string | null
   price: number // base currency
+  sale_price: number | null // active flash-sale price (null when no sale)
+  sale_ends_at?: string | null
   cost?: number
   stock: number
   images: string[]
@@ -99,7 +101,17 @@ export interface Brand {
   base_currency: string
   currencies: Currency[]
   delivery: { enabled: boolean; free_delivery_above: number; zones: Zone[] }
-  payments: { cod: boolean; stripe: boolean; demo: boolean }
+  payments: {
+    cod: boolean
+    stripe: boolean
+    demo: boolean
+    wallet: boolean
+    wallet_phone: string | null
+    instapay_address: string | null
+    fawry: boolean
+  }
+  whatsapp_number: string | null
+  environment?: string
   contact: { phone: string | null; email: string | null; address: string | null }
   social: Record<string, string>
 }
@@ -120,8 +132,9 @@ export interface Order {
   id: number
   order_no: string
   status: 'pending' | 'confirmed' | 'packing' | 'out_for_delivery' | 'delivered' | 'cancelled'
-  payment_method: 'cod' | 'stripe'
+  payment_method: 'cod' | 'stripe' | 'vodafone_cash' | 'instapay' | 'fawry'
   payment_status: 'pending' | 'paid' | 'refunded' | 'failed'
+  payment_reference: string | null
   currency: string
   rate: number
   subtotal: number

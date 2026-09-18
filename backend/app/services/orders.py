@@ -77,6 +77,25 @@ def _aware(dt: datetime | None) -> datetime | None:
     return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
 
 
+def sale_active(p) -> bool:
+    """True when the product has a valid time-boxed flash sale right now."""
+    if p.sale_price is None:
+        return False
+    now = datetime.now(timezone.utc)
+    start = _aware(p.sale_starts_at)
+    end = _aware(p.sale_ends_at)
+    if start and now < start:
+        return False
+    if end and now > end:
+        return False
+    return float(p.sale_price) < float(p.price)
+
+
+def effective_price(p) -> Decimal:
+    """Unit price right now (flash sale aware), base currency."""
+    return q2(p.sale_price) if sale_active(p) else q2(p.price)
+
+
 def apply_promo(db: Session, code: str | None, subtotal_base) -> Promo | None:
     if not code:
         return None
@@ -105,7 +124,7 @@ def compute_lines(db: Session, body: CheckoutIn, settings: SiteSettings):
         if p.stock < line.qty:
             raise HTTPException(status_code=409, detail=f"Out of stock: {p.name_en or p.name_ar}")
         lines.append((p, line))
-        subtotal += q2(p.price) * line.qty
+        subtotal += effective_price(p) * line.qty
 
     gov = resolve_governorate(db, body.governorate_id)
     threshold = float(settings.free_delivery_above or 0)

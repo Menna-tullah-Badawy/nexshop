@@ -14,6 +14,7 @@ export const ADMIN_MENU: { key: string; icon: string; tkey: string }[] = [
   { key: '/admin/delivery', icon: 'car', tkey: 'app.deliveryTitle' },
   { key: '/admin/customers', icon: 'people', tkey: 'app.customers' },
   { key: '/admin/promos', icon: 'ticket', tkey: 'app.promos' },
+  { key: '/admin/reports', icon: 'bar-chart', tkey: 'app.reports' },
   { key: '/admin/settings', icon: 'settings', tkey: 'app.settings' },
 ]
 

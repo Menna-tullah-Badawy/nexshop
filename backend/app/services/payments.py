@@ -1,8 +1,9 @@
-"""Payments service: Cash on Delivery, Stripe (hosted Checkout) and Demo mode.
+"""Payments service: COD, Stripe (hosted Checkout), Egyptian wallets and Demo mode.
 
-Demo mode (default when no Stripe key is configured) marks Stripe orders as
-paid instantly so the whole flow can be demonstrated — perfect for selling
-the template.
+Demo mode marks card orders as paid instantly so the whole flow can be
+demonstrated without Stripe keys. SAFETY: demo mode is forcibly disabled
+when ENV=production, so a live store can never confirm an order without
+real payment.
 """
 
 from __future__ import annotations
@@ -12,10 +13,14 @@ from dataclasses import dataclass
 import stripe
 from fastapi import HTTPException
 
+from ..core.config import get_settings as get_cfg
+
+WALLET_METHODS = ("vodafone_cash", "instapay", "fawry")
+
 
 @dataclass
 class PaymentResult:
-    provider: str  # cod | stripe | demo
+    provider: str  # cod | stripe | demo | vodafone_cash | instapay | fawry
     url: str | None = None
     needs_redirect: bool = False
     demo: bool = False
@@ -30,12 +35,19 @@ class PaymentsService:
         return (self.s.stripe_secret_key or "").strip() or None
 
     def is_demo(self) -> bool:
+        # Hard safety guard: demo payments can NEVER happen in production
+        if get_cfg().is_production:
+            return False
         return bool(self.s.demo_payments) or not self.stripe_key or not self.s.stripe_enabled
 
     # ------------------------------------------------------------------ #
     def start_payment(self, order) -> PaymentResult:
         if order.payment_method == "cod":
             return PaymentResult(provider="cod")
+
+        if order.payment_method in WALLET_METHODS:
+            # Manual-confirm methods: customer transfers, merchant marks paid
+            return PaymentResult(provider=order.payment_method)
 
         if self.is_demo():
             order.payment_status = "paid"

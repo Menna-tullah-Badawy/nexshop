@@ -65,6 +65,8 @@ class ProductOut(BaseModel):
     desc_en: str | None
     brand: str | None
     price: float
+    sale_price: float | None = None
+    sale_ends_at: datetime | None = None
     cost: float | None = None
     stock: int
     images: list[str]
@@ -85,6 +87,10 @@ class ProductIn(BaseModel):
     brand: str | None = None
     price: float = Field(ge=0)
     cost: float = Field(default=0, ge=0)
+    # Flash sale (time-boxed discount)
+    sale_price: float | None = Field(default=None, ge=0)
+    sale_starts_at: datetime | None = None
+    sale_ends_at: datetime | None = None
     stock: int = Field(default=0, ge=0)
     images: list[str] = []
     variants: list | None = None

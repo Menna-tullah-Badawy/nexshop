@@ -43,3 +43,4 @@ build/
 # Local databases
 backend/dev.db
 backend/test.db
+.ssh/

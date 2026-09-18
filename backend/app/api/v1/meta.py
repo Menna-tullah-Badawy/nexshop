@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from ...core.config import get_settings as get_cfg
 from ...core.deps import get_db
 from ...models import Governorate, SiteSettings
 from ...services import currency_list
@@ -41,9 +42,15 @@ def brand(lang: str = "en", db: Session = Depends(get_db)):
         },
         "payments": {
             "cod": s.cod_enabled,
-            "stripe": s.stripe_enabled or s.demo_payments,
-            "demo": s.demo_payments,
+            "stripe": s.stripe_enabled or (s.demo_payments and not get_cfg().is_production),
+            "demo": s.demo_payments and not get_cfg().is_production,
+            "wallet": s.wallet_enabled,
+            "wallet_phone": s.wallet_phone,
+            "instapay_address": s.instapay_address,
+            "fawry": s.fawry_enabled and s.wallet_enabled,
         },
+        "whatsapp_number": s.whatsapp_number,
+        "environment": get_cfg().env,
         "contact": {
             "phone": s.contact_phone,
             "email": s.contact_email,

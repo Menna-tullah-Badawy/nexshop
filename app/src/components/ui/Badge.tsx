@@ -47,7 +47,15 @@ export function PayBadge({ method, status }: { method: string; status: string })
     <View style={{ flexDirection: 'row', gap: 6 }}>
       <View style={{ paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999, backgroundColor: colors.surfaceAlt }}>
         <Text style={{ color: colors.textMuted, fontSize: 10, fontWeight: '700' }}>
-          {method === 'cod' ? 'COD' : 'STRIPE'}
+          {method === 'cod'
+            ? 'COD'
+            : method === 'vodafone_cash'
+              ? 'VODAFONE CASH'
+              : method === 'instapay'
+                ? 'INSTAPAY'
+                : method === 'fawry'
+                  ? 'FAWRY'
+                  : 'STRIPE'}
         </Text>
       </View>
       <View

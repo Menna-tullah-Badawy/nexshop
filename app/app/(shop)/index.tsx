@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { FlatList, Pressable, Text, View } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import { router } from 'expo-router'
+import { Link, router } from 'expo-router'
 import { Screen } from '../../src/components/ui/Screen'
 import { Chip } from '../../src/components/ui/Badge'
 import { EmptyState, Spinner } from '../../src/components/ui/EmptyState'
@@ -199,6 +199,21 @@ export default function Home() {
         }
         ListEmptyComponent={
           loading ? <Spinner /> : <EmptyState icon="search-outline" title={t('app.noProducts')} />
+        }
+        ListFooterComponent={
+          <View style={{ paddingVertical: 24, alignItems: 'center', gap: 8 }}>
+            <View style={{ flexDirection: 'row', gap: 18 }}>
+              <Link href="/privacy">
+                <Text style={{ color: colors.textMuted, fontSize: 12 }}>{t('app.privacy')}</Text>
+              </Link>
+              <Link href="/terms">
+                <Text style={{ color: colors.textMuted, fontSize: 12 }}>{t('app.terms')}</Text>
+              </Link>
+            </View>
+            <Text style={{ color: colors.textMuted, fontSize: 11 }}>
+              © {new Date().getFullYear()} {brand?.store_name ?? 'Store'}
+            </Text>
+          </View>
         }
       />
     </Screen>

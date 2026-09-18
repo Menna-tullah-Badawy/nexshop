@@ -24,6 +24,23 @@ class Settings(BaseSettings):
 
     stripe_webhook_secret: str = ""
 
+    # Email (SMTP) — when disabled, emails are logged to console (dev-friendly)
+    email_enabled: bool = False
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = "NexShop <no-reply@nexshop.local>"
+    smtp_starttls: bool = True
+
+    # Uploads (product images etc.)
+    upload_dir: str = "uploads"
+    max_upload_mb: int = 5
+
+    # Security
+    rate_limit_enabled: bool = True
+    password_reset_minutes: int = 60
+
     port: int = 8000
 
     model_config = SettingsConfigDict(

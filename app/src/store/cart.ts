@@ -52,7 +52,7 @@ export const useCartStore = create<CartState>()(
                 name_ar: p.name_ar,
                 name_en: p.name_en,
                 image: p.images?.[0] ?? null,
-                price: p.price,
+                price: p.sale_price ?? p.price, // flash-sale aware
                 stock: p.stock,
                 qty: Math.min(qty, Math.max(1, p.stock || 1)),
                 variant,

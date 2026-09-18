@@ -1,9 +1,12 @@
 import '../src/i18n'
 import React from 'react'
+import { View } from 'react-native'
 import { Stack } from 'expo-router'
 import { StatusBar } from 'expo-status-bar'
 import { ThemeProvider, useTheme } from '../src/theme/ThemeContext'
 import AppProviders from '../src/providers/AppProviders'
+import { ErrorBoundary } from '../src/components/ErrorBoundary'
+import { OfflineBanner } from '../src/components/OfflineBanner'
 
 function RootNavigator() {
   const { colors, isDark } = useTheme()
@@ -27,8 +30,13 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <AppProviders>
-      <RootNavigator />
-    </AppProviders>
+    <ErrorBoundary>
+      <AppProviders>
+        <View style={{ flex: 1 }}>
+          <OfflineBanner />
+          <RootNavigator />
+        </View>
+      </AppProviders>
+    </ErrorBoundary>
   )
 }

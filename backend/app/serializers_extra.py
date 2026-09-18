@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+from .services.orders import sale_active
+
 
 def product_dict(p, include_cost: bool = False) -> dict:
     revs = p.reviews or []
     avg = round(sum(r.rating for r in revs) / len(revs), 2) if revs else 0
+    on_sale = sale_active(p)
     d = {
         "id": p.id,
         "category_id": p.category_id,
@@ -16,6 +19,8 @@ def product_dict(p, include_cost: bool = False) -> dict:
         "desc_en": p.desc_en,
         "brand": p.brand,
         "price": float(p.price),
+        "sale_price": float(p.sale_price) if on_sale else None,
+        "sale_ends_at": p.sale_ends_at,
         "stock": p.stock,
         "images": p.images or [],
         "variants": p.variants,
@@ -26,6 +31,10 @@ def product_dict(p, include_cost: bool = False) -> dict:
     }
     if include_cost:
         d["cost"] = float(p.cost or 0)
+        # admin sees raw sale config regardless of window
+        d["sale_price_raw"] = float(p.sale_price) if p.sale_price is not None else None
+        d["sale_starts_at"] = p.sale_starts_at
+        d["sale_ends_at_raw"] = p.sale_ends_at
     return d
 
 
@@ -36,6 +45,7 @@ def order_dict(o) -> dict:
         "status": o.status,
         "payment_method": o.payment_method,
         "payment_status": o.payment_status,
+        "payment_reference": o.payment_reference,
         "currency": o.currency,
         "rate": float(o.rate or 1),
         "subtotal": float(o.subtotal or 0),
@@ -93,6 +103,12 @@ def settings_dict(s) -> dict:
         "stripe_enabled": s.stripe_enabled,
         "stripe_secret_key": s.stripe_secret_key,
         "demo_payments": s.demo_payments,
+        "wallet_enabled": s.wallet_enabled,
+        "wallet_phone": s.wallet_phone,
+        "instapay_address": s.instapay_address,
+        "fawry_enabled": s.fawry_enabled,
+        "whatsapp_number": s.whatsapp_number,
+        "low_stock_threshold": s.low_stock_threshold,
         "contact_phone": s.contact_phone,
         "contact_email": s.contact_email,
         "contact_address": s.contact_address,

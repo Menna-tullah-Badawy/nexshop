@@ -10,6 +10,7 @@ os.environ["AUTO_SEED"] = "false"
 os.environ["AUTO_CREATE_TABLES"] = "true"
 os.environ["JWT_SECRET"] = "test-secret-key-0123456789-0123456789"
 os.environ["FRONTEND_URL"] = "http://localhost:8081"
+os.environ["RATE_LIMIT_ENABLED"] = "false"  # rate limiting has its own dedicated test
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 

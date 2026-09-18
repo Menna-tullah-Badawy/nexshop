@@ -16,7 +16,9 @@ class CheckoutIn(BaseModel):
     address_id: int | None = None
     address: AddressIn | None = None
     governorate_id: int | None = None
-    payment_method: str = Field(default="cod", pattern="^(cod|stripe)$")
+    payment_method: str = Field(
+        default="cod", pattern="^(cod|stripe|vodafone_cash|instapay|fawry)$"
+    )
     promo_code: str | None = None
     notes: str | None = None
 

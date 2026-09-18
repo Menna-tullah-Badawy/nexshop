@@ -48,6 +48,12 @@ interface Settings {
   stripe_enabled: boolean
   stripe_secret_key: string | null
   demo_payments: boolean
+  wallet_enabled: boolean
+  wallet_phone: string | null
+  instapay_address: string | null
+  fawry_enabled: boolean
+  whatsapp_number: string | null
+  low_stock_threshold: number
   contact_phone: string | null
   contact_email: string | null
   contact_address: string | null
@@ -118,6 +124,12 @@ export default function AdminSettings() {
         cod_enabled: s.cod_enabled,
         stripe_enabled: s.stripe_enabled,
         demo_payments: s.demo_payments,
+        wallet_enabled: s.wallet_enabled,
+        wallet_phone: s.wallet_phone || null,
+        instapay_address: s.instapay_address || null,
+        fawry_enabled: s.fawry_enabled,
+        whatsapp_number: s.whatsapp_number || null,
+        low_stock_threshold: Number(s.low_stock_threshold) || 0,
         contact_phone: s.contact_phone || null,
         contact_email: s.contact_email || null,
         contact_address: s.contact_address || null,
@@ -239,6 +251,23 @@ export default function AdminSettings() {
             <Text style={{ color: colors.textMuted, fontSize: 12, flex: 1, marginRight: 10 }}>{t('app.demoPayments')}</Text>
             <Switch value={s.demo_payments} onValueChange={(v) => set({ demo_payments: v })} trackColor={{ true: colors.primary, false: colors.border }} thumbColor="#fff" />
           </View>
+          {s.demo_payments ? (
+            <View style={{ backgroundColor: 'rgba(245,158,11,0.12)', borderRadius: 8, borderWidth: 1, borderColor: 'rgba(245,158,11,0.5)', padding: 10 }}>
+              <Text style={{ color: colors.text, fontSize: 12, lineHeight: 18 }}>⚠️ {t('app.demoPaymentsWarn')}</Text>
+            </View>
+          ) : null}
+          <View style={{ height: 1, backgroundColor: colors.border }} />
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={{ color: colors.text, fontSize: 13, fontWeight: '600' }}>{t('app.walletEnabled')}</Text>
+            <Switch value={s.wallet_enabled} onValueChange={(v) => set({ wallet_enabled: v })} trackColor={{ true: colors.primary, false: colors.border }} thumbColor="#fff" />
+          </View>
+          <Input label={t('app.walletPhone')} value={s.wallet_phone ?? ''} onChangeText={(v) => set({ wallet_phone: v })} keyboardType="phone-pad" placeholder="01xxxxxxxxx" />
+          <Input label={t('app.instapayAddr')} value={s.instapay_address ?? ''} onChangeText={(v) => set({ instapay_address: v })} autoCapitalize="none" placeholder="store@instapay" />
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Text style={{ color: colors.text, fontSize: 13, fontWeight: '600' }}>{t('app.fawryEnabled')}</Text>
+            <Switch value={s.fawry_enabled} onValueChange={(v) => set({ fawry_enabled: v })} trackColor={{ true: colors.primary, false: colors.border }} thumbColor="#fff" />
+          </View>
+          <Input label={t('app.whatsappNumber')} value={s.whatsapp_number ?? ''} onChangeText={(v) => set({ whatsapp_number: v })} keyboardType="phone-pad" placeholder="+20xxxxxxxxxx" />
         </View>
 
         <Title>{t('app.deliveryTitle')}</Title>
@@ -254,6 +283,12 @@ export default function AdminSettings() {
             keyboardType="decimal-pad"
           />
           <Text style={{ color: colors.textMuted, fontSize: 11 }}>{t('app.freeDeliveryHint')}</Text>
+          <Input
+            label={t('app.lowStockThreshold')}
+            value={String(s.low_stock_threshold ?? 5)}
+            onChangeText={(v) => set({ low_stock_threshold: Number(v) || 0 })}
+            keyboardType="number-pad"
+          />
         </View>
 
         <Title>{t('app.contact')}</Title>

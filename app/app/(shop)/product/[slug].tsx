@@ -167,9 +167,12 @@ export default function ProductDetail() {
                 padding: 14,
               }}
             >
-              <View>
-                <Text style={{ color: colors.textMuted, fontSize: 11, marginBottom: 2 }}>{t('app.total')}</Text>
-                <Price amount={p.price * qty} size={24} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <View>
+                  <Text style={{ color: colors.textMuted, fontSize: 11, marginBottom: 2 }}>{t('app.total')}</Text>
+                  <Price amount={(p.sale_price ?? p.price) * qty} size={24} />
+                </View>
+                {p.sale_price != null ? <Price amount={p.price * qty} size={14} muted strike /> : null}
               </View>
               <QtyStepper qty={qty} onChange={setQty} max={Math.max(1, p.stock)} />
             </View>

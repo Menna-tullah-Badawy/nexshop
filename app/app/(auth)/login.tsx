@@ -59,6 +59,11 @@ export default function Login() {
             onSubmitEditing={() => doLogin()}
           />
           <Button label={t('app.login')} onPress={() => doLogin()} loading={busy} />
+          <View style={{ alignItems: 'flex-end', marginTop: 8 }}>
+            <Link href="/forgot-password">
+              <Text style={{ color: colors.textMuted, fontSize: 13 }}>{t('app.forgotPassword')}</Text>
+            </Link>
+          </View>
 
           {brand?.payments?.demo ? (
             <View

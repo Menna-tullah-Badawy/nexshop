@@ -40,6 +40,10 @@ class Product(Base):
     brand: Mapped[str | None] = mapped_column(String(128))
     price: Mapped[float] = mapped_column(Numeric(12, 2))  # always in base currency
     cost: Mapped[float] = mapped_column(Numeric(12, 2), default=0)
+    # Flash sale (time-boxed discount) — effective when sale_price set and inside window
+    sale_price: Mapped[float | None] = mapped_column(Numeric(12, 2))
+    sale_starts_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    sale_ends_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     stock: Mapped[int] = mapped_column(Integer, default=0)
     images: Mapped[list] = mapped_column(JSON, default=list)
     # variants: [{"label": "Size", "values": ["S", "M", "L"]}, ...]  (simple, seller-friendly)
@@ -63,7 +67,7 @@ class Review(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     product_id: Mapped[int] = mapped_column(
-        ForeignKey("products.id", ondelete="CASCADE"), index=True, unique=True
+        ForeignKey("products.id", ondelete="CASCADE"), index=True
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     rating: Mapped[int] = mapped_column(Integer)

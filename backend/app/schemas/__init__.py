@@ -1,5 +1,16 @@
 from .common import Msg, Page
-from .user import AddressIn, AddressOut, LoginIn, RefreshIn, TokenOut, UserCreate, UserOut, UserUpdate
+from .user import (
+    AddressIn,
+    AddressOut,
+    ForgotPasswordIn,
+    LoginIn,
+    RefreshIn,
+    ResetPasswordIn,
+    TokenOut,
+    UserCreate,
+    UserOut,
+    UserUpdate,
+)
 from .catalog import ProductIn, ProductOut, ReviewIn, ReviewOut, slugify
 from .order import CartItemIn, CheckoutIn, OrderDetailOut, OrderItemOut, OrderOut, PaymentOut
 from .admin import (
@@ -24,6 +35,8 @@ __all__ = [
     "UserUpdate",
     "LoginIn",
     "RefreshIn",
+    "ForgotPasswordIn",
+    "ResetPasswordIn",
     "TokenOut",
     "AddressIn",
     "AddressOut",

@@ -40,6 +40,7 @@ from ...schemas import (
 from ...services import (
     CURRENCY_INFO,
     get_settings_row,
+    mailer,
     next_status,
     q2,
 )
@@ -79,9 +80,11 @@ def dashboard(db: Session = Depends(get_db)):
     status_counts = {s: int(c) for s, c in status_rows}
     pending_delivery = status_counts.get("packing", 0) + status_counts.get("out_for_delivery", 0)
 
+    srow = get_settings_row(db)
+    threshold = int(srow.low_stock_threshold or 5)
     low_stock = db.execute(
         select(Product)
-        .where(Product.is_active.is_(True), Product.stock <= 5)
+        .where(Product.is_active.is_(True), Product.stock <= threshold)
         .order_by(Product.stock.asc())
         .limit(5)
     ).scalars().all()
@@ -415,6 +418,7 @@ def update_order(oid: int, body: OrderStatusUpdate | OrderMetaUpdate, db: Sessio
         if new_status not in ORDER_FLOW + ["cancelled"]:
             raise HTTPException(status_code=400, detail="Invalid status")
         o.status = new_status
+        mailer.send_status_update(o, get_settings_row(db))
         if new_status == "delivered":
             o.delivered_at = datetime.now(timezone.utc)
             if o.payment_method == "cod" and o.payment_status != "paid":
@@ -446,9 +450,57 @@ def advance_order(oid: int, db: Session = Depends(get_db)):
         o.delivered_at = datetime.now(timezone.utc)
         if o.payment_method == "cod" and o.payment_status != "paid":
             o.payment_status = "paid"
+    mailer.send_status_update(o, get_settings_row(db))
     db.commit()
     db.refresh(o)
     return order_dict(o)
+
+
+# ------------------------------ Reports ------------------------------ #
+
+@router.get("/reports/products", response_model=list[dict])
+def report_products(days: int = Query(default=30, ge=1, le=365), db: Session = Depends(get_db)):
+    """Per-product sales report (units + revenue in base currency)."""
+    since = datetime.now(timezone.utc) - timedelta(days=days)
+    rows = db.execute(
+        select(
+            OrderItem.product_id,
+            OrderItem.name_ar,
+            OrderItem.name_en,
+            func.sum(OrderItem.qty),
+            func.sum(OrderItem.line_total),
+            func.count(func.distinct(OrderItem.order_id)),
+        )
+        .join(Order, OrderItem.order_id == Order.id)
+        .where(Order.created_at >= since, Order.status != "cancelled")
+        .group_by(OrderItem.product_id, OrderItem.name_ar, OrderItem.name_en)
+        .order_by(func.sum(OrderItem.line_total).desc())
+    ).all()
+    return [
+        {
+            "product_id": r[0],
+            "name": r[2] or r[1] or "Item",
+            "units_sold": int(r[3] or 0),
+            "revenue": float(r[4] or 0),
+            "orders": int(r[5] or 0),
+        }
+        for r in rows
+    ]
+
+
+@router.get("/reports/low-stock", response_model=list[dict])
+def report_low_stock(db: Session = Depends(get_db)):
+    srow = get_settings_row(db)
+    threshold = int(srow.low_stock_threshold or 5)
+    rows = db.execute(
+        select(Product)
+        .where(Product.is_active.is_(True), Product.stock <= threshold)
+        .order_by(Product.stock.asc())
+    ).scalars().all()
+    return [
+        {"id": p.id, "name": p.name_en or p.name_ar, "stock": p.stock, "threshold": threshold}
+        for p in rows
+    ]
 
 
 @router.post("/orders/{oid}/mark-paid", response_model=dict)

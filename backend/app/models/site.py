@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, Numeric, String, func
+from sqlalchemy import JSON, Boolean, DateTime, Integer, Numeric, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from ..db.base import Base
@@ -63,6 +63,15 @@ class SiteSettings(Base):
     stripe_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
     stripe_secret_key: Mapped[str | None] = mapped_column(String(512))
     demo_payments: Mapped[bool] = mapped_column(Boolean, default=True)
+    # Egyptian wallets / Fawry (manual-confirm payment methods)
+    wallet_enabled: Mapped[bool] = mapped_column(Boolean, default=True)
+    wallet_phone: Mapped[str | None] = mapped_column(String(32))  # Vodafone Cash number
+    instapay_address: Mapped[str | None] = mapped_column(String(128))  # e.g. store@instapay
+    fawry_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    whatsapp_number: Mapped[str | None] = mapped_column(String(32))  # order notifications
+
+    # Inventory
+    low_stock_threshold: Mapped[int] = mapped_column(Integer, default=5)
 
     # Contact
     contact_phone: Mapped[str | None] = mapped_column(String(32))

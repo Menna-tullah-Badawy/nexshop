@@ -18,8 +18,10 @@ class Order(Base):
     # Delivery pipeline: pending -> confirmed -> packing -> out_for_delivery -> delivered
     # plus cancelled
     status: Mapped[str] = mapped_column(String(24), default="pending", index=True)
-    payment_method: Mapped[str] = mapped_column(String(16), default="cod")  # cod | stripe
+    payment_method: Mapped[str] = mapped_column(String(24), default="cod")  # cod|stripe|vodafone_cash|instapay|fawry
     payment_status: Mapped[str] = mapped_column(String(16), default="pending")  # pending|paid|refunded|failed
+    # Reference code shown to the customer for wallet / Fawry transfers
+    payment_reference: Mapped[str | None] = mapped_column(String(64))
 
     # Currency snapshot at order time
     currency: Mapped[str] = mapped_column(String(16))  # display currency of the buyer

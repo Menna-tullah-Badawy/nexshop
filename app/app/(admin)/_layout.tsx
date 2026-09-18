@@ -29,6 +29,7 @@ export default function AdminLayout() {
       <Stack.Screen name="delivery" />
       <Stack.Screen name="customers" />
       <Stack.Screen name="promos" />
+      <Stack.Screen name="reports" />
       <Stack.Screen name="settings" />
     </Stack>
   )

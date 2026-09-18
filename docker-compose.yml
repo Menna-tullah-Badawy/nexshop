@@ -3,15 +3,15 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: shop
-      POSTGRES_PASSWORD: shop
-      POSTGRES_DB: nexshop
+      POSTGRES_USER: ${POSTGRES_USER:-shop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shop}
+      POSTGRES_DB: ${POSTGRES_DB:-nexshop}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U shop -d nexshop"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-shop} -d ${POSTGRES_DB:-nexshop}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -20,16 +20,27 @@ services:
     build: ./backend
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+psycopg://shop:shop@db:5432/nexshop
-      JWT_SECRET: ${JWT_SECRET:-change-me-to-a-long-random-string-32+}
+      ENV: ${ENV:-production}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-shop}:${POSTGRES_PASSWORD:-shop}@db:5432/${POSTGRES_DB:-nexshop}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET to a long random string}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8081}
       CORS_ORIGINS: ${CORS_ORIGINS:-*}
-      ENV: ${ENV:-development}
-      AUTO_SEED: "true"
+      # Migrations run in the entrypoint; tables are NOT auto-created in prod
+      AUTO_CREATE_TABLES: "false"
+      AUTO_SEED: ${AUTO_SEED:-true}
       STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
       STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET:-}
+      # Email (optional — console log when empty)
+      EMAIL_ENABLED: ${EMAIL_ENABLED:-false}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-NexShop <no-reply@nexshop.local>}
     ports:
       - "8000:8000"
+    volumes:
+      - uploads:/code/uploads
     depends_on:
       db:
         condition: service_healthy
@@ -44,5 +55,26 @@ services:
     depends_on:
       - api
 
+  # Automatic daily database backups (kept: 7 days / 4 weeks / 6 months)
+  backup:
+    image: prodrigestivill/postgres-backup-local:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_DB: ${POSTGRES_DB:-nexshop}
+      POSTGRES_USER: ${POSTGRES_USER:-shop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-shop}
+      SCHEDULE: "@daily"
+      BACKUP_KEEP_DAYS: 7
+      BACKUP_KEEP_WEEKS: 4
+      BACKUP_KEEP_MONTHS: 6
+      HEALTHCHECK_PORT: 81
+    volumes:
+      - ./backups:/backups
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:
+  uploads:

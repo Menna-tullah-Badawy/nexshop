@@ -18,6 +18,8 @@ from .services import get_settings_row
 settings = get_settings()
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
+UPLOAD_DIR = Path(settings.upload_dir)
+UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _init_db() -> None:
@@ -72,6 +74,8 @@ app.add_middleware(
 
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
 app.include_router(api_router, prefix="/api")
 

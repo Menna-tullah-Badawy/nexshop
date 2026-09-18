@@ -82,6 +82,13 @@ class SettingsUpdate(BaseModel):
     stripe_enabled: bool | None = None
     stripe_secret_key: str | None = None
     demo_payments: bool | None = None
+    wallet_enabled: bool | None = None
+    wallet_phone: str | None = None
+    instapay_address: str | None = None
+    fawry_enabled: bool | None = None
+    whatsapp_number: str | None = None
+    # Inventory
+    low_stock_threshold: int | None = Field(default=None, ge=0)
     # Contact
     contact_phone: str | None = None
     contact_email: str | None = None

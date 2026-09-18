@@ -99,6 +99,12 @@ def seed_all(db: Session) -> None:
                 cod_enabled=True,
                 stripe_enabled=False,
                 demo_payments=True,
+                wallet_enabled=True,
+                wallet_phone="01000000000",
+                instapay_address="nexshop@instapay",
+                fawry_enabled=False,
+                whatsapp_number="+201000000000",
+                low_stock_threshold=5,
                 contact_phone="+20 100 000 0000",
                 contact_email="support@nexshop.com",
                 contact_address="Nasr City, Cairo, Egypt",
@@ -146,6 +152,16 @@ def seed_all(db: Session) -> None:
     if db.execute(select(Governorate).limit(1)).scalar_one_or_none() is None:
         for ar, en, fee in GOVERNORATES:
             db.add(Governorate(name_ar=ar, name_en=en, fee=fee))
+
+    # ---------------- flash sales demo (time-boxed discounts) ---------------- #
+    db.flush()  # session is autoflush=False — ensure products exist first
+    all_products = db.execute(select(Product).order_by(Product.id)).scalars().all()
+    if len(all_products) >= 6:
+        now = datetime.now(timezone.utc)
+        for p in all_products[-2:]:  # last two products get a demo flash sale
+            p.sale_price = round(float(p.price) * 0.8, 2)
+            p.sale_starts_at = now - timedelta(days=1)
+            p.sale_ends_at = now + timedelta(days=14)
 
     # ---------------- promos ---------------- #
     from .models import Promo
